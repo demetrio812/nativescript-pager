@@ -64,6 +64,8 @@ export class Pager extends PagerBase {
     private _isDataDirty: boolean = false;
     private _previousIndex: number = -1;
 
+    nativePageIndicator: UIPageControl; /*UIPageControl*/
+
     constructor() {
         super();
         this._map = new Map<PagerCell, View>();
@@ -83,6 +85,16 @@ export class Pager extends PagerBase {
         this._ios.showsHorizontalScrollIndicator = false;
         this._ios.showsVerticalScrollIndicator = false;
         this._ios.decelerationRate = UIScrollViewDecelerationRateFast;
+
+        console.log('this.showNativePageIndicator = ' + this.showNativePageIndicator);
+        if (this.showNativePageIndicator) {
+            this.nativePageIndicator = UIPageControl.alloc().initWithFrame(CGRectMake(0, 0, 200, 80));
+            this.nativePageIndicator.hidesForSinglePage = true; // TODO make a property
+            this.nativePageIndicator.pageIndicatorTintColor = UIColor.redColor; // TODO make a property
+            // this._ios.addSubview(this.nativePageIndicator);
+            // (<UICollectionView>this._ios).superview.addSubview(this.nativePageIndicator);
+            // (<View>this)..addSubview(this.nativePageIndicator);
+        }
         return this._ios;
     }
 
@@ -679,6 +691,9 @@ class UICollectionDelegateImpl extends NSObject
             owner.scrollToIndexAnimated(indexOfMajorCell, true);
         }
         owner.selectedIndex = this.currentPage;
+        if (owner.showNativePageIndicator) {
+            owner.nativePageIndicator.currentPage = this.currentPage;
+        }
     }
 
 }
@@ -802,6 +817,9 @@ class UICollectionViewDataSourceImpl extends NSObject
                                                 section: number): number {
         const owner = this._owner ? this._owner.get() : null;
         if (!owner) return 0;
+        if (owner.showNativePageIndicator) {
+            owner.nativePageIndicator.numberOfPages = owner._childrenCount;
+        }
         return owner._childrenCount;
     }
 
